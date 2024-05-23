@@ -47,6 +47,26 @@ const create = async function (req, res) {
   }
 }
 
+const promote = async function (req, res) {
+  try {
+    const restauranteAPromocionar = await Restaurant.findByPk(req.params.restaurantId)
+    const posibleR = await Restaurant.findOne({ where: { userId: req.user.id, isPromoted: true } })
+    if (!posibleR) {
+      restauranteAPromocionar.isPromoted = true
+      await restauranteAPromocionar.save()
+      res.json(restauranteAPromocionar)
+    } else {
+      posibleR.isPromoted = false
+      restauranteAPromocionar.isPromoted = true
+      await posibleR.save()
+      await restauranteAPromocionar.save()
+      res.json(restauranteAPromocionar)
+    }
+  } catch (sergio) {
+    res.status(500).send(sergio)
+  }
+}
+
 const show = async function (req, res) {
   // Only returns PUBLIC information of restaurants
   try {
@@ -101,6 +121,7 @@ const RestaurantController = {
   create,
   show,
   update,
-  destroy
+  destroy,
+  promote
 }
 export default RestaurantController
